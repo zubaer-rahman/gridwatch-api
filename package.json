@@ -5,14 +5,15 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "prisma skills sync || exit 0",
     "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js",
-    "build": "tsc"
+    "build": "tsc",
+    "postinstall": "prisma skills sync || exit 0"
   },
   "keywords": [],
   "type": "module",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.11.0",
@@ -25,16 +26,20 @@
     "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.3.0",
+    "pg": "^8.23.0",
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.12",
+    "@prisma/config": "^7.10.0",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.2.0",
     "@types/node": "^26.4.1",
-    "prisma": "^8.0.0-rc.12",
+    "@types/pg": "^8.23.1",
+    "prisma": "^7.10.0",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3"

@@ -1,0 +1,61 @@
+model DistributionZone {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  substations Substation[]
+  operators   User[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("distribution_zones")
+}
+
+model Substation {
+  id      String           @id @default(uuid())
+  name    String           @unique
+  zoneId  String
+  zone    DistributionZone @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  feeders Feeder[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([zoneId])
+  @@map("substations")
+}
+
+model Feeder {
+  id           String     @id @default(uuid())
+  name         String     @unique
+  substationId String
+  substation   Substation @relation(fields: [substationId], references: [id], onDelete: Restrict)
+  areas        Area[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([substationId])
+  @@map("feeders")
+}
+
+model Area {
+  id       String @id @default(uuid())
+  name     String
+  feederId String
+  feeder   Feeder @relation(fields: [feederId], references: [id], onDelete: Restrict)
+
+  schedules Schedule[]
+  outages   Outage[]
+  reports   OutageReport[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([feederId])
+  @@map("areas")
+}

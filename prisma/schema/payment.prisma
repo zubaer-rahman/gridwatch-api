@@ -1,0 +1,21 @@
+model Payment {
+  id             String        @id @default(uuid())
+  customerId     String
+  customer       User          @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  amount         Float
+  status         PaymentStatus @default(PENDING)
+  transactionId  String?       @unique
+  gatewayData    Json?
+  reason         String
+  outageReportId String?       @unique
+  outageReport   OutageReport? @relation(fields: [outageReportId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([transactionId])
+  @@index([status])
+  @@index([outageReportId])
+  @@map("payments")
+}

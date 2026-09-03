@@ -1,0 +1,60 @@
+model Outage {
+  id                       String       @id @default(uuid())
+  areaId                   String
+  area                     Area         @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  status                   OutageStatus @default(REPORTED)
+  priority                 Priority     @default(MEDIUM)
+  description              String?
+  estimatedRestorationTime DateTime?
+  restoredAt               DateTime?
+
+  reports     OutageReport[]
+  assignments Assignment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([areaId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@map("outages")
+}
+
+model OutageReport {
+  id          String   @id @default(uuid())
+  customerId  String
+  customer    User     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  areaId      String
+  area        Area     @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  outageId    String?
+  outage      Outage?  @relation(fields: [outageId], references: [id], onDelete: SetNull)
+  description String?
+  isPriority  Boolean  @default(false)
+  payment     Payment?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([customerId])
+  @@index([areaId])
+  @@index([outageId])
+  @@map("outage_reports")
+}
+
+model Assignment {
+  id         String @id @default(uuid())
+  operatorId String
+  operator   User   @relation(fields: [operatorId], references: [id], onDelete: Restrict)
+  outageId   String
+  outage     Outage @relation(fields: [outageId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([operatorId])
+  @@index([outageId])
+  @@map("assignments")
+}

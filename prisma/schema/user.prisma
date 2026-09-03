@@ -1,0 +1,39 @@
+model User {
+  id            String            @id @default(uuid())
+  name          String
+  email         String            @unique
+  password      String
+  role          Role              @default(CUSTOMER)
+  contactNumber String?
+  avatar        String?
+  isActive      Boolean           @default(true)
+  zoneId        String?
+  zone          DistributionZone? @relation(fields: [zoneId], references: [id])
+
+  reports       OutageReport[]
+  assignments   Assignment[]
+  payments      Payment[]
+  notifications Notification[]
+  refreshTokens RefreshToken[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([role])
+  @@index([email])
+  @@index([zoneId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}

@@ -1,0 +1,18 @@
+model Schedule {
+  id       String         @id @default(uuid())
+  areaId   String
+  area     Area           @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  startsAt DateTime
+  endsAt   DateTime
+  status   ScheduleStatus @default(UPCOMING)
+  reason   String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([areaId])
+  @@index([startsAt])
+  @@index([status])
+  @@map("schedules")
+}

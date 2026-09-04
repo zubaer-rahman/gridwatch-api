@@ -1,7 +1,7 @@
 import { Redis } from "ioredis";
 import config from "../config/index.js";
 
-const redisClient = new Redis(config.redis_url as string, {
+const redisClient = new Redis(config.redis.url as string, {
 	maxRetriesPerRequest: null,
 });
 

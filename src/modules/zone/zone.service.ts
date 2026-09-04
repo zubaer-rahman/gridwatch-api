@@ -1,7 +1,10 @@
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma.js";
 import AppError from "../../utils/AppError.js";
-import type { ICreateZonePayload, IUpdateZonePayload } from "./zone.interface.js";
+import type {
+	ICreateZonePayload,
+	IUpdateZonePayload,
+} from "./zone.interface.js";
 
 const createZone = async (payload: ICreateZonePayload) => {
 	const isZoneExists = await prisma.distributionZone.findUnique({
@@ -9,7 +12,10 @@ const createZone = async (payload: ICreateZonePayload) => {
 	});
 
 	if (isZoneExists) {
-		throw new AppError(httpStatus.CONFLICT, "Zone with this name already exists");
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"Zone with this name already exists",
+		);
 	}
 
 	return await prisma.distributionZone.create({
@@ -63,7 +69,10 @@ const updateZone = async (id: string, payload: IUpdateZonePayload) => {
 		});
 
 		if (isNameExists) {
-			throw new AppError(httpStatus.CONFLICT, "Zone with this name already exists");
+			throw new AppError(
+				httpStatus.CONFLICT,
+				"Zone with this name already exists",
+			);
 		}
 	}
 

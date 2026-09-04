@@ -35,7 +35,10 @@ const getZoneById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateZone = catchAsync(async (req: Request, res: Response) => {
-	const result = await ZoneService.updateZone(req.params.id as string, req.body);
+	const result = await ZoneService.updateZone(
+		req.params.id as string,
+		req.body,
+	);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,

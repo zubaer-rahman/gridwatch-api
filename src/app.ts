@@ -1,6 +1,10 @@
-import express, { Application, Request, Response } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
+import cors from "cors";
+import express, {
+	type Application,
+	type Request,
+	type Response,
+} from "express";
+import helmet from "helmet";
 
 const app: Application = express();
 
@@ -13,14 +17,21 @@ app.use(helmet());
 app.use(cors());
 
 // Test Route
-app.get('/', (req: Request, res: Response) => {
-  res.send({
-    success: true,
-    message: 'GridWatch API is running...',
-    data: {}
-  });
+app.get("/", (_req: Request, res: Response) => {
+	res.send({
+		success: true,
+		message: "GridWatch API is running...",
+		data: {},
+	});
 });
 
-// Default not found and error handler can be added later
+import notFound from "./middlewares/notFound.js";
+import globalErrorHandler from "./middlewares/globalErrorHandler.js";
+
+// TODO: API Routes will be mounted here
+// app.use("/api/v1", routes);
+
+app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;

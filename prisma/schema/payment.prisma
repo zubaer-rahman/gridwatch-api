@@ -6,6 +6,7 @@ model Payment {
   status         PaymentStatus @default(PENDING)
   transactionId  String?       @unique
   gatewayData    Json?
+  paymentGateway String        @default("bkash")
   reason         String
   outageReportId String?       @unique
   outageReport   OutageReport? @relation(fields: [outageReportId], references: [id], onDelete: SetNull)

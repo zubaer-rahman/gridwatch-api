@@ -118,7 +118,7 @@ const verifyEmail = async (payload: IVerifyEmailPayload) => {
 
 	await OTPService.deleteOTP(email);
 	await OTPService.redisClient.del(registrationKey);
-	
+
 	await EmailService.sendWelcomeEmail(email, createdUser.name);
 
 	return null;

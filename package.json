@@ -10,6 +10,9 @@
     "build": "tsc",
     "postinstall": "prisma skills sync || exit 0"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "keywords": [],
   "type": "module",
   "dependencies": {
@@ -17,8 +20,10 @@
     "@prisma/client": "^7.10.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.11.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
     "helmet": "^8.3.0",
@@ -26,6 +31,7 @@
     "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.3.0",
+    "nodemailer": "^9.1.1",
     "pg": "^8.23.0",
     "zod": "^4.5.4"
   },
@@ -33,11 +39,14 @@
     "@biomejs/biome": "2.5.12",
     "@prisma/config": "^7.10.0",
     "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
+    "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.2.0",
     "@types/node": "^26.4.1",
+    "@types/nodemailer": "^8.0.1",
     "@types/pg": "^8.23.1",
     "prisma": "^7.10.0",
     "ts-node-dev": "^2.0.0",

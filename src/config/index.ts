@@ -15,4 +15,13 @@ export default {
 	},
 	bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
 	redis_url: process.env.REDIS_URL,
+	email: {
+		smtp_user: process.env.SMTP_USER,
+		smtp_password: process.env.SMTP_PASSWORD,
+		sender: process.env.EMAIL_SENDER,
+	},
+	admin: {
+		email: process.env.ADMIN_EMAIL,
+		password: process.env.ADMIN_PASSWORD,
+	},
 };

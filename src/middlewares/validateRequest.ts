@@ -12,10 +12,26 @@ const validateRequest = (schema: ZodObject) => {
         cookies: req.cookies,
       })) as Record<string, any>;
 
-      req.body = parsedData.body || req.body;
-      req.query = parsedData.query || req.query;
-      req.params = parsedData.params || req.params;
-      req.cookies = parsedData.cookies || req.cookies;
+      if (parsedData.body) req.body = parsedData.body;
+      if (parsedData.cookies) req.cookies = parsedData.cookies;
+
+      if (parsedData.query) {
+        Object.defineProperty(req, "query", {
+          value: parsedData.query,
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        });
+      }
+      
+      if (parsedData.params) {
+        Object.defineProperty(req, "params", {
+          value: parsedData.params,
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        });
+      }
 
       next();
     },

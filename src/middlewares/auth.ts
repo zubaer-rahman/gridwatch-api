@@ -25,9 +25,10 @@ const auth = (...requiredRoles: Role[]) => {
 	return catchAsync(
 		async (req: Request, _res: Response, next: NextFunction) => {
 			// 1. Token Extraction
-			const token = req.headers.authorization?.startsWith("Bearer ")
-				? req.headers.authorization.split(" ")[1]
-				: req.headers.authorization;
+			const token =
+				(req.headers.authorization?.startsWith("Bearer ")
+					? req.headers.authorization.split(" ")[1]
+					: req.headers.authorization) || req.cookies?.accessToken;
 
 			if (!token) {
 				throw new AppError(

@@ -5,3 +5,12 @@ dist
 coverage
 *.log
 implementation.md
+!.env.example
+
+# Testing & Scratch Files
+test_*.ts
+*_test.ts
+*.test.ts
+*.spec.ts
+__tests__/
+scratch/

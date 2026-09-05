@@ -1,5 +1,5 @@
-import ejs from "ejs";
 import path from "node:path";
+import ejs from "ejs";
 import config from "../config/index.js";
 import { transporter } from "../lib/nodemailer.js";
 

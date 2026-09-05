@@ -27,7 +27,7 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const getStatistics = catchAsync(async (req: Request, res: Response) => {
+const getStatistics = catchAsync(async (_req: Request, res: Response) => {
 	const result = await AdminService.getStatistics();
 
 	sendResponse(res, {

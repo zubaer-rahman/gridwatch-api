@@ -14,7 +14,7 @@ const createArea = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const getAllAreas = catchAsync(async (req: Request, res: Response) => {
+const getAllAreas = catchAsync(async (_req: Request, res: Response) => {
 	const result = await AreaService.getAllAreas();
 
 	sendResponse(res, {

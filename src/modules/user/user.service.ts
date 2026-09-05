@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import type { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
 import httpStatus from "http-status";
 import config from "../../config/index.js";
@@ -130,16 +130,18 @@ const getAllUsers = async (query: Record<string, unknown>) => {
 	if (role) {
 		whereConditions.role = role as Role;
 	}
-	
+
 	if (isActive !== undefined) {
-		whereConditions.isActive = isActive === 'true';
+		whereConditions.isActive = isActive === "true";
 	}
 
 	if (searchTerm) {
 		whereConditions.OR = [
 			{ name: { contains: searchTerm as string, mode: "insensitive" } },
 			{ email: { contains: searchTerm as string, mode: "insensitive" } },
-			{ contactNumber: { contains: searchTerm as string, mode: "insensitive" } }
+			{
+				contactNumber: { contains: searchTerm as string, mode: "insensitive" },
+			},
 		];
 	}
 
@@ -149,9 +151,9 @@ const getAllUsers = async (query: Record<string, unknown>) => {
 
 	const orderBy: any = {};
 	if (sortBy) {
-		orderBy[sortBy as string] = sortOrder === 'desc' ? 'desc' : 'asc';
+		orderBy[sortBy as string] = sortOrder === "desc" ? "desc" : "asc";
 	} else {
-		orderBy['createdAt'] = 'desc';
+		orderBy.createdAt = "desc";
 	}
 
 	const users = await prisma.user.findMany({

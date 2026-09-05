@@ -1,8 +1,8 @@
+import { PaymentStatus, type Prisma } from "@prisma/client";
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma.js";
 import AppError from "../../utils/AppError.js";
 import type { IAdminUserQuery, IAuditLogQuery } from "./admin.interface.js";
-import { PaymentStatus, type Prisma } from "@prisma/client";
 
 const getAllUsers = async (query: IAdminUserQuery) => {
 	const limit = query.limit ? Number(query.limit) : 10;

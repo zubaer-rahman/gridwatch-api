@@ -4,8 +4,8 @@ import { prisma } from "../../lib/prisma.js";
 import AppError from "../../utils/AppError.js";
 import type {
 	ICreateSchedulePayload,
-	IUpdateSchedulePayload,
 	IGetAllSchedulesQuery,
+	IUpdateSchedulePayload,
 } from "./schedule.interface.js";
 
 /**

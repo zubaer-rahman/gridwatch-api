@@ -1,9 +1,13 @@
-import { PaymentStatus, Prisma } from "@prisma/client";
+import { PaymentStatus, type Prisma } from "@prisma/client";
 import httpStatus from "http-status";
-import { prisma } from "../../lib/prisma.js";
 import config from "../../config/index.js";
+import {
+	createBkashPayment,
+	executeBkashPayment,
+	getBkashToken,
+} from "../../lib/bkash.js";
+import { prisma } from "../../lib/prisma.js";
 import AppError from "../../utils/AppError.js";
-import { getBkashToken, createBkashPayment, executeBkashPayment } from "../../lib/bkash.js";
 import type { IInitiatePaymentPayload } from "./payment.interface.js";
 
 const initiatePayment = async (

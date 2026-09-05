@@ -14,7 +14,7 @@ const createSubstation = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const getAllSubstations = catchAsync(async (req: Request, res: Response) => {
+const getAllSubstations = catchAsync(async (_req: Request, res: Response) => {
 	const result = await SubstationService.getAllSubstations();
 
 	sendResponse(res, {

@@ -2,8 +2,8 @@ import app from "./app.js";
 import config from "./config/index.js";
 
 import { prisma } from "./lib/prisma.js";
-import { EmailService } from "./services/email.service.js";
 import { OTPService } from "./lib/redis.js";
+import { EmailService } from "./services/email.service.js";
 import { seedSuperAdmin } from "./utils/seed.js";
 
 async function main() {

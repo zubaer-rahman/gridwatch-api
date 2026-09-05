@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import config from "../config/index.js";
-import { OTPService } from "./redis.js";
 import AppError from "../utils/AppError.js";
+import { OTPService } from "./redis.js";
 
 export const getBkashToken = async () => {
 	const IdTokenKey = "bkash_token";

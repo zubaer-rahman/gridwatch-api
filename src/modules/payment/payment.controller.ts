@@ -18,7 +18,7 @@ const initiatePayment = catchAsync(async (req: Request, res: Response) => {
 });
 
 const processCallback = catchAsync(async (req: Request, res: Response) => {
-	const result = await PaymentService.processCallback(
+	const _result = await PaymentService.processCallback(
 		req.query.paymentID as string,
 		req.query.status as string,
 	);
@@ -51,7 +51,7 @@ const processCallback = catchAsync(async (req: Request, res: Response) => {
 	res.send(htmlContent);
 });
 
-const getAllPayments = catchAsync(async (req: Request, res: Response) => {
+const getAllPayments = catchAsync(async (_req: Request, res: Response) => {
 	const result = await PaymentService.getAllPayments();
 
 	sendResponse(res, {

@@ -14,7 +14,7 @@ const createZone = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const getAllZones = catchAsync(async (req: Request, res: Response) => {
+const getAllZones = catchAsync(async (_req: Request, res: Response) => {
 	const result = await ZoneService.getAllZones();
 
 	sendResponse(res, {

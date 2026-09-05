@@ -1,10 +1,13 @@
+import type { Prisma } from "@prisma/client";
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma.js";
 import AppError from "../../utils/AppError.js";
 import type { INotificationQuery } from "./notification.interface.js";
-import type { Prisma } from "@prisma/client";
 
-const getMyNotifications = async (userId: string, query: INotificationQuery) => {
+const getMyNotifications = async (
+	userId: string,
+	query: INotificationQuery,
+) => {
 	const limit = query.limit ? Number(query.limit) : 10;
 	const page = query.page ? Number(query.page) : 1;
 	const skip = (page - 1) * limit;
@@ -51,7 +54,10 @@ const markAsRead = async (id: string, userId: string) => {
 	}
 
 	if (notification.userId !== userId) {
-		throw new AppError(httpStatus.FORBIDDEN, "You do not own this notification");
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			"You do not own this notification",
+		);
 	}
 
 	const result = await prisma.notification.update({

@@ -22,7 +22,8 @@ const limiter = rateLimit({
 	legacyHeaders: false,
 	message: {
 		success: false,
-		message: "Too many requests from this IP, please try again after 15 minutes",
+		message:
+			"Too many requests from this IP, please try again after 15 minutes",
 		errorSources: [],
 	},
 });
@@ -39,8 +40,8 @@ app.get("/", (_req: Request, res: Response) => {
 	});
 });
 
-import notFound from "./middlewares/notFound.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
+import notFound from "./middlewares/notFound.js";
 
 import router from "./routes/index.js";
 

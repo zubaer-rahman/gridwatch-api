@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { ScheduleStatus } from "@prisma/client";
+import { z } from "zod";
 
 const createScheduleSchema = z.object({
 	body: z

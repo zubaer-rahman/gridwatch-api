@@ -1,11 +1,10 @@
 import crypto from "node:crypto";
 import bcrypt from "bcrypt";
 import httpStatus from "http-status";
-import type { z } from "zod";
 import config from "../../config/index.js";
 import { prisma } from "../../lib/prisma.js";
-import { EmailService } from "../../services/email.service.js";
 import { OTPService } from "../../lib/redis.js";
+import { EmailService } from "../../services/email.service.js";
 import AppError from "../../utils/AppError.js";
 import { jwtUtils } from "../../utils/jwt.js";
 import type {
@@ -244,12 +243,11 @@ const logoutUser = async (token: string) => {
 	return null;
 };
 
-
 import { verifyGoogleToken } from "../../lib/googleAuth.js";
 
 const googleLogin = async (payload: { idToken: string }) => {
 	const payloadData = await verifyGoogleToken(payload.idToken);
-	if (!payloadData || !payloadData.email) {
+	if (!payloadData?.email) {
 		throw new AppError(httpStatus.UNAUTHORIZED, "Invalid Google token");
 	}
 

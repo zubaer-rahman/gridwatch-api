@@ -3,6 +3,7 @@ model User {
   name          String
   email         String            @unique
   password      String
+  provider      AuthProvider      @default(LOCAL)
   role          Role              @default(CUSTOMER)
   contactNumber String?
   avatar        String?

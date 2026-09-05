@@ -5,7 +5,7 @@ import type { z } from "zod";
 import config from "../../config/index.js";
 import { prisma } from "../../lib/prisma.js";
 import { EmailService } from "../../services/email.service.js";
-import { OTPService } from "../../services/redis.service.js";
+import { OTPService } from "../../lib/redis.js";
 import AppError from "../../utils/AppError.js";
 import { jwtUtils } from "../../utils/jwt.js";
 import type {
@@ -135,6 +135,13 @@ const loginUser = async (payload: ILoginUserPayload) => {
 		throw new AppError(httpStatus.NOT_FOUND, "User not found");
 	}
 
+	if (user.provider !== "LOCAL") {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			`Please login using your ${user.provider} account`,
+		);
+	}
+
 	if (user.deletedAt) {
 		throw new AppError(httpStatus.FORBIDDEN, "This account has been deleted");
 	}
@@ -237,10 +244,95 @@ const logoutUser = async (token: string) => {
 	return null;
 };
 
+
+import { verifyGoogleToken } from "../../lib/googleAuth.js";
+
+const googleLogin = async (payload: { idToken: string }) => {
+	const payloadData = await verifyGoogleToken(payload.idToken);
+	if (!payloadData || !payloadData.email) {
+		throw new AppError(httpStatus.UNAUTHORIZED, "Invalid Google token");
+	}
+
+	const email = payloadData.email.trim().toLowerCase();
+	let user = await prisma.user.findUnique({
+		where: { email },
+	});
+
+	if (user) {
+		if (user.deletedAt) {
+			throw new AppError(httpStatus.FORBIDDEN, "This account has been deleted");
+		}
+		if (!user.isActive) {
+			// Auto-verify since Google guarantees email ownership
+			user = await prisma.user.update({
+				where: { id: user.id },
+				data: { isActive: true },
+			});
+			await OTPService.deleteOTP(email);
+			await OTPService.redisClient.del(`registration-data:${email}`);
+		}
+	} else {
+		// Generate random password for Google signup
+		const crypto = await import("node:crypto");
+		const randomPassword = crypto.randomBytes(16).toString("hex");
+		const hashedPassword = await bcrypt.hash(
+			randomPassword,
+			Number(config.bcrypt_salt_rounds || 10),
+		);
+
+		user = await prisma.user.create({
+			data: {
+				name: payloadData.name || "Google User",
+				email,
+				password: hashedPassword,
+				provider: "GOOGLE",
+				contactNumber: null,
+				isActive: true, // Google email is inherently verified
+				avatar: payloadData.picture,
+				role: "CUSTOMER",
+			},
+		});
+	}
+
+	const jwtPayload = {
+		userId: user.id,
+		email: user.email,
+		role: user.role,
+	};
+
+	const accessToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt.secret as string,
+		config.jwt.expires_in as string,
+	);
+
+	const refreshToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt.refresh_secret as string,
+		config.jwt.refresh_expires_in as string,
+	);
+
+	const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+	await prisma.refreshToken.create({
+		data: {
+			token: refreshToken,
+			userId: user.id,
+			expiresAt,
+		},
+	});
+
+	return {
+		accessToken,
+		refreshToken,
+	};
+};
+
 export const AuthService = {
 	registerUser,
 	verifyEmail,
 	loginUser,
 	refreshToken,
 	logoutUser,
+	googleLogin,
 };

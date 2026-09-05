@@ -18,14 +18,20 @@ const verifyEmailSchema = z.object({
 
 const loginUserSchema = z.object({
 	body: z.object({
-		email: z.email({ message: "Invalid email format" }),
+		email: z.string().email({ message: "Invalid email format" }),
 		password: z.string().min(1, "Password is required"),
 	}),
 });
 
 const refreshTokenSchema = z.object({
 	cookies: z.object({
-		refreshToken: z.string().min(1, "Refresh token is required"),
+		refreshToken: z.string().min(1, "Refresh token is required!"),
+	}),
+});
+
+const googleLoginSchema = z.object({
+	body: z.object({
+		idToken: z.string().min(1, "Google ID token is required!"),
 	}),
 });
 
@@ -34,4 +40,5 @@ export const AuthValidation = {
 	verifyEmailSchema,
 	loginUserSchema,
 	refreshTokenSchema,
+	googleLoginSchema,
 };

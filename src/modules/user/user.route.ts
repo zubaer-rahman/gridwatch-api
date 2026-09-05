@@ -23,4 +23,13 @@ router.patch(
 	UserController.updateUser,
 );
 
+import { upload } from "../../lib/multer.js";
+
+router.patch(
+	"/me/avatar",
+	auth(Role.CUSTOMER, Role.OPERATOR, Role.ADMIN),
+	upload.single("file"),
+	UserController.uploadAvatar,
+);
+
 export const UserRoutes = router;

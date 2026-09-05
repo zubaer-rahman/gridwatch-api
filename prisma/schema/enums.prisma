@@ -32,3 +32,8 @@ enum ScheduleStatus {
   COMPLETED
   CANCELLED
 }
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}

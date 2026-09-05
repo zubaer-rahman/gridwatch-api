@@ -88,10 +88,29 @@ const logoutUser = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const googleLogin = catchAsync(async (req, res) => {
+	const result = await AuthService.googleLogin(req.body);
+	const { refreshToken, accessToken } = result;
+
+	res.cookie("refreshToken", refreshToken, {
+		secure: config.env === "production",
+		httpOnly: true,
+	});
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		message: "User logged in successfully via Google",
+		data: {
+			accessToken,
+		},
+	});
+});
+
 export const AuthController = {
 	registerUser,
 	verifyEmail,
 	loginUser,
 	refreshToken,
 	logoutUser,
+	googleLogin,
 };

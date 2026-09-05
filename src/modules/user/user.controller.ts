@@ -29,11 +29,26 @@ const updateUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-	const result = await UserService.getAllUsers(req.query);
+	const { meta, data } = await UserService.getAllUsers(req.query);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		message: "Users retrieved successfully",
+		meta,
+		data,
+	});
+});
+
+const uploadAvatar = catchAsync(async (req: Request, res: Response) => {
+	if (!req.file) {
+		throw new Error("Please upload a file");
+	}
+
+	const result = await UserService.uploadAvatar(req.user.userId, req.file);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		message: "Avatar uploaded successfully",
 		data: result,
 	});
 });
@@ -42,4 +57,5 @@ export const UserController = {
 	createUser,
 	updateUser,
 	getAllUsers,
+	uploadAvatar,
 };

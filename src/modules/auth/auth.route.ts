@@ -29,6 +29,12 @@ router.post(
 	AuthController.refreshToken,
 );
 
+router.post(
+	"/google-login",
+	validateRequest(AuthValidation.googleLoginSchema),
+	AuthController.googleLogin,
+);
+
 router.post("/logout", AuthController.logoutUser);
 
 export const AuthRoutes = router;

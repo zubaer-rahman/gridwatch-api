@@ -1,15 +1,7 @@
-import nodemailer from "nodemailer";
 import ejs from "ejs";
 import path from "node:path";
 import config from "../config/index.js";
-
-const transporter = nodemailer.createTransport({
-	service: "gmail",
-	auth: {
-		user: config.email.smtp_user,
-		pass: config.email.smtp_password,
-	},
-});
+import { transporter } from "../lib/nodemailer.js";
 
 const sendRegistrationOTP = async (
 	to: string,

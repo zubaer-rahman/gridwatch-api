@@ -3,99 +3,8 @@ import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma.js";
 import config from "../../config/index.js";
 import AppError from "../../utils/AppError.js";
-import { OTPService } from "../../services/redis.service.js";
+import { getBkashToken, createBkashPayment, executeBkashPayment } from "../../lib/bkash.js";
 import type { IInitiatePaymentPayload } from "./payment.interface.js";
-
-const getBkashToken = async () => {
-	const IdTokenKey = "bkash_token";
-	const RefreshTokenKey = "bkash_refresh_token";
-
-	let bkashIdToken = await OTPService.redisClient.get(IdTokenKey);
-	const bkashIdTokenTTL = await OTPService.redisClient.ttl(IdTokenKey);
-
-	const bkashRefreshToken = await OTPService.redisClient.get(RefreshTokenKey);
-	const bkashRefreshTokenTTL =
-		await OTPService.redisClient.ttl(RefreshTokenKey);
-
-	// If token expires in less than 10 mins, but refresh token is still valid, use refresh strategy
-	if (
-		(bkashIdTokenTTL <= 600 || !bkashIdToken) &&
-		bkashRefreshToken &&
-		bkashRefreshTokenTTL > 600
-	) {
-		const refreshTokenResponse = await fetch(
-			`${config.bkash.base_url}/tokenized/checkout/token/refresh`,
-			{
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					username: config.bkash.username as string,
-					password: config.bkash.password as string,
-				},
-				body: JSON.stringify({
-					app_key: config.bkash.app_key,
-					app_secret: config.bkash.app_secret,
-					refresh_token: bkashRefreshToken,
-				}),
-			},
-		);
-
-		if (!refreshTokenResponse.ok) {
-			throw new AppError(
-				httpStatus.BAD_GATEWAY,
-				"Bkash Access Token Refresh Failed",
-			);
-		}
-
-		const bkashRefreshTokenResult = await refreshTokenResponse.json();
-		bkashIdToken = bkashRefreshTokenResult.id_token as string;
-
-		await OTPService.redisClient.set(IdTokenKey, bkashIdToken, "EX", 3600);
-		return bkashIdToken;
-	}
-
-	// If token is perfectly valid (> 10 mins)
-	if (bkashIdTokenTTL > 600 && bkashIdToken) {
-		return bkashIdToken;
-	}
-
-	// If all else fails, grant a new token
-	const response = await fetch(
-		`${config.bkash.base_url}/tokenized/checkout/token/grant`,
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				username: config.bkash.username as string,
-				password: config.bkash.password as string,
-			},
-			body: JSON.stringify({
-				app_key: config.bkash.app_key,
-				app_secret: config.bkash.app_secret,
-			}),
-		},
-	);
-
-	const data = await response.json();
-	if (data.statusCode !== "0000") {
-		throw new AppError(
-			httpStatus.BAD_GATEWAY,
-			"Failed to connect to bKash gateway",
-		);
-	}
-
-	// Cache the ID token for 1 hour
-	await OTPService.redisClient.set(IdTokenKey, data.id_token, "EX", 3600);
-	// Cache the refresh token for 28 days
-	await OTPService.redisClient.set(
-		RefreshTokenKey,
-		data.refresh_token,
-		"EX",
-		60 * 60 * 24 * 28,
-	);
-
-	return data.id_token;
-};
 
 const initiatePayment = async (
 	customerId: string,
@@ -123,10 +32,9 @@ const initiatePayment = async (
 
 	const token = await getBkashToken();
 
-	// Create payment in bKash
 	const createPayload = {
 		mode: "0011",
-		payerReference: user.email || "unknown@user.com", // bKash payerReference has length limits; use email
+		payerReference: user.email || "unknown@user.com",
 		callbackURL: config.bkash.callback_url,
 		amount: payload.amount.toString(),
 		currency: "BDT",
@@ -134,21 +42,7 @@ const initiatePayment = async (
 		merchantInvoiceNumber: `INV-${Date.now()}`,
 	};
 
-	const response = await fetch(
-		`${config.bkash.base_url}/tokenized/checkout/create`,
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
-				Authorization: token,
-				"X-App-Key": config.bkash.app_key as string,
-			},
-			body: JSON.stringify(createPayload),
-		},
-	);
-
-	const data = await response.json();
+	const data = await createBkashPayment(token, createPayload);
 
 	if (data.statusCode !== "0000") {
 		throw new AppError(
@@ -157,14 +51,13 @@ const initiatePayment = async (
 		);
 	}
 
-	// Save to DB
 	const payment = await prisma.payment.create({
 		data: {
 			customerId,
 			amount: payload.amount,
 			reason: payload.reason,
 			outageReportId: payload.outageReportId,
-			transactionId: data.paymentID, // Use bKash paymentID as transactionId
+			transactionId: data.paymentID,
 			status: PaymentStatus.PENDING,
 		},
 	});
@@ -174,7 +67,7 @@ const initiatePayment = async (
 		transactionId: payment.transactionId,
 		amount: payment.amount,
 		status: payment.status,
-		bkashURL: data.bkashURL, // Send this back for frontend redirect
+		bkashURL: data.bkashURL,
 	};
 };
 
@@ -206,24 +99,8 @@ const processCallback = async (paymentID: string, status: string) => {
 		return { message: "Payment failed or cancelled", payment: updated };
 	}
 
-	// If success, verify and execute via bKash API
 	const token = await getBkashToken();
-
-	const response = await fetch(
-		`${config.bkash.base_url}/tokenized/checkout/execute`,
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
-				Authorization: token,
-				"X-App-Key": config.bkash.app_key as string,
-			},
-			body: JSON.stringify({ paymentID }),
-		},
-	);
-
-	const bkashData = await response.json();
+	const bkashData = await executeBkashPayment(token, paymentID);
 
 	if (bkashData.statusCode && bkashData.statusCode !== "0000") {
 		const updated = await prisma.payment.update({

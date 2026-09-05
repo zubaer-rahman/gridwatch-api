@@ -124,15 +124,41 @@ const updateUser = async (
 };
 
 const getAllUsers = async (query: Record<string, unknown>) => {
-	const { role } = query;
+	const { role, isActive, searchTerm, sortBy, sortOrder, page, limit } = query;
 	const whereConditions: any = { deletedAt: null };
 
 	if (role) {
 		whereConditions.role = role as Role;
 	}
+	
+	if (isActive !== undefined) {
+		whereConditions.isActive = isActive === 'true';
+	}
 
-	return await prisma.user.findMany({
+	if (searchTerm) {
+		whereConditions.OR = [
+			{ name: { contains: searchTerm as string, mode: "insensitive" } },
+			{ email: { contains: searchTerm as string, mode: "insensitive" } },
+			{ contactNumber: { contains: searchTerm as string, mode: "insensitive" } }
+		];
+	}
+
+	const pageNumber = Number(page) || 1;
+	const limitNumber = Number(limit) || 10;
+	const skip = (pageNumber - 1) * limitNumber;
+
+	const orderBy: any = {};
+	if (sortBy) {
+		orderBy[sortBy as string] = sortOrder === 'desc' ? 'desc' : 'asc';
+	} else {
+		orderBy['createdAt'] = 'desc';
+	}
+
+	const users = await prisma.user.findMany({
 		where: whereConditions,
+		skip,
+		take: limitNumber,
+		orderBy,
 		select: {
 			id: true,
 			name: true,
@@ -145,10 +171,52 @@ const getAllUsers = async (query: Record<string, unknown>) => {
 			},
 		},
 	});
+
+	const total = await prisma.user.count({ where: whereConditions });
+
+	return {
+		meta: {
+			page: pageNumber,
+			limit: limitNumber,
+			total,
+			totalPages: Math.ceil(total / limitNumber),
+		},
+		data: users,
+	};
+};
+
+import { uploadToCloudinary } from "../../lib/cloudinary.js";
+
+const uploadAvatar = async (id: string, file: Express.Multer.File) => {
+	const user = await prisma.user.findUnique({
+		where: { id, deletedAt: null },
+	});
+
+	if (!user) {
+		throw new AppError(httpStatus.NOT_FOUND, "User not found");
+	}
+
+	const result = await uploadToCloudinary(
+		file.buffer,
+		"gridwatch-avatars",
+		`avatar-${id}-${Date.now()}`,
+	);
+
+	return await prisma.user.update({
+		where: { id },
+		data: { avatar: result.secure_url },
+		select: {
+			id: true,
+			name: true,
+			email: true,
+			avatar: true,
+		},
+	});
 };
 
 export const UserService = {
 	createUser,
 	updateUser,
 	getAllUsers,
+	uploadAvatar,
 };

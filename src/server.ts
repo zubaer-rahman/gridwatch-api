@@ -14,8 +14,12 @@ async function main() {
 		await OTPService.verifyConnection();
 		console.log("🔴 Redis connected successfully");
 
-		await EmailService.verifyConnection();
-		console.log("✉️ Nodemailer connected successfully");
+		try {
+			await EmailService.verifyConnection();
+			console.log("✉️ Nodemailer connected successfully");
+		} catch (error) {
+			console.warn("⚠️ Nodemailer connection failed, emails will not be sent, but server will continue.");
+		}
 
 		// Inject the Genesis Admin if they don't exist
 		await seedSuperAdmin();

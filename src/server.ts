@@ -19,9 +19,9 @@ async function main() {
 
 		try {
 			await EmailService.verifyConnection();
-			console.log("✉️ Nodemailer connected successfully");
+			// The EmailService.verifyConnection already logs a success message for SMTP now
 		} catch (error) {
-			console.warn("⚠️ Nodemailer connection failed, emails will not be sent, but server will continue.");
+			console.warn("⚠️ SMTP configuration failed, emails will not be sent, but server will continue.");
 		}
 
 		// Inject the Genesis Admin if they don't exist

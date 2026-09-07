@@ -1,7 +1,7 @@
 import path from "node:path";
 import ejs from "ejs";
-import config from "../config/index.js";
 import { transporter } from "../lib/nodemailer.js";
+import config from "../config/index.js";
 
 const sendRegistrationOTP = async (
 	to: string,
@@ -20,12 +20,17 @@ const sendRegistrationOTP = async (
 		expirationMinutes,
 	});
 
-	await transporter.sendMail({
-		from: config.email.sender || config.email.smtp_user,
-		to,
-		subject: "GridWatch: Verify Your Email",
-		html,
-	});
+	try {
+		await transporter.sendMail({
+			from: `"GridWatch" <${config.smtp.user}>`,
+			to,
+			subject: "GridWatch: Verify Your Email",
+			html,
+		});
+	} catch (error) {
+		console.error("Nodemailer error:", error);
+		throw new Error("Failed to send OTP email");
+	}
 };
 
 const sendWelcomeEmail = async (to: string, name: string) => {
@@ -36,16 +41,26 @@ const sendWelcomeEmail = async (to: string, name: string) => {
 
 	const html = await ejs.renderFile(templatePath, { name });
 
-	await transporter.sendMail({
-		from: config.email.sender || config.email.smtp_user,
-		to,
-		subject: "Welcome to GridWatch!",
-		html,
-	});
+	try {
+		await transporter.sendMail({
+			from: `"GridWatch" <${config.smtp.user}>`,
+			to,
+			subject: "Welcome to GridWatch!",
+			html,
+		});
+	} catch (error) {
+		console.error("Nodemailer error:", error);
+		throw new Error("Failed to send welcome email");
+	}
 };
 
 const verifyConnection = async () => {
-	await transporter.verify();
+	try {
+		await transporter.verify();
+		console.log("✉️ SMTP connected successfully");
+	} catch (error) {
+		console.error("SMTP Connection Error:", error);
+	}
 };
 
 export const EmailService = {

@@ -32,8 +32,9 @@
 		"ioredis": "^6.0.0",
 		"jsonwebtoken": "^9.0.3",
 		"multer": "^2.3.0",
-		"nodemailer": "^9.1.1",
+		"nodemailer": "^10.0.0",
 		"pg": "^8.23.0",
+		"resend": "^6.26.0",
 		"zod": "^4.5.4"
 	},
 	"devDependencies": {

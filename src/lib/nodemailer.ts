@@ -1,16 +1,14 @@
 import nodemailer from "nodemailer";
-import type SMTPTransport from "nodemailer/lib/smtp-transport/index.js";
 import config from "../config/index.js";
 
 export const transporter = nodemailer.createTransport({
-	host: "smtp.gmail.com",
-	port: 465,
-	secure: true,
+	host: config.smtp.host,
+	port: Number(config.smtp.port) || 587,
+	secure: Number(config.smtp.port) === 465,
+	// @ts-ignore: family is passed directly to node's net.connect to force IPv4
+	family: 4,
 	auth: {
-		user: config.email.smtp_user,
-		pass: config.email.smtp_password,
+		user: config.smtp.user,
+		pass: config.smtp.pass,
 	},
-	tls: {
-		rejectUnauthorized: false,
-	},
-} as SMTPTransport.Options);
+});

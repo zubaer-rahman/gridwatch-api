@@ -25,15 +25,9 @@ export default {
 		app_key: process.env.BKASH_APP_KEY,
 		app_secret: process.env.BKASH_APP_SECRET,
 	},
-	resend: {
-		api_key: process.env.RESEND_API_KEY,
+	brevo: {
+		api_key: process.env.BREVO_API_KEY,
 		sender: process.env.EMAIL_SENDER,
-	},
-	smtp: {
-		host: process.env.SMTP_HOST,
-		port: process.env.SMTP_PORT,
-		user: process.env.SMTP_USER,
-		pass: process.env.SMTP_PASS,
 	},
 	admin: {
 		email: process.env.ADMIN_EMAIL,

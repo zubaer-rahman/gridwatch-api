@@ -48,6 +48,7 @@ model Area {
   feederId String
   feeder   Feeder @relation(fields: [feederId], references: [id], onDelete: Restrict)
 
+  customers User[]
   schedules Schedule[]
   outages   Outage[]
   reports   OutageReport[]

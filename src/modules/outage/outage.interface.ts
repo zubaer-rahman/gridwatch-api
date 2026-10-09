@@ -7,3 +7,9 @@ export type ICreateOutagePayload = z.infer<
 export type IUpdateOutagePayload = z.infer<
 	typeof OutageValidation.updateOutageSchema
 >["body"];
+
+export type IOutageFilterRequest = {
+	status?: string;
+	areaId?: string;
+	priority?: string;
+};

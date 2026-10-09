@@ -22,7 +22,16 @@ const updateOutageSchema = z.object({
 	}),
 });
 
+const getAllOutagesQuerySchema = z.object({
+	query: z.object({
+		status: z.nativeEnum(OutageStatus).optional(),
+		areaId: z.string().optional(),
+		priority: z.nativeEnum(Priority).optional(),
+	}),
+});
+
 export const OutageValidation = {
 	createOutageSchema,
 	updateOutageSchema,
+	getAllOutagesQuerySchema,
 };

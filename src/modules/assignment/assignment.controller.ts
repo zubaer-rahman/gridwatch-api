@@ -27,6 +27,18 @@ const getAllAssignments = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getMyAssignments = catchAsync(async (req: Request, res: Response) => {
+	const operatorId = req.user.userId;
+	const filters = req.query as IAssignmentFilterRequest;
+	const result = await AssignmentService.getMyAssignments(operatorId, filters);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		message: "My assignments retrieved successfully",
+		data: result,
+	});
+});
+
 const getAssignmentById = catchAsync(async (req: Request, res: Response) => {
 	const result = await AssignmentService.getAssignmentById(
 		req.params.id as string,
@@ -56,6 +68,7 @@ const deleteAssignment = catchAsync(async (req: Request, res: Response) => {
 export const AssignmentController = {
 	createAssignment,
 	getAllAssignments,
+	getMyAssignments,
 	getAssignmentById,
 	deleteAssignment,
 };

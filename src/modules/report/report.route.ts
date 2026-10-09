@@ -22,6 +22,12 @@ router.get(
 );
 
 router.get(
+	"/me",
+	auth(Role.CUSTOMER),
+	ReportController.getMyReports,
+);
+
+router.get(
 	"/:id",
 	auth(Role.ADMIN, Role.OPERATOR, Role.CUSTOMER),
 	ReportController.getReportById,

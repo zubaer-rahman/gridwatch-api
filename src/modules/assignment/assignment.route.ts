@@ -22,6 +22,12 @@ router.get(
 );
 
 router.get(
+	"/me",
+	auth(Role.OPERATOR),
+	AssignmentController.getMyAssignments,
+);
+
+router.get(
 	"/:id",
 	auth(Role.ADMIN, Role.OPERATOR),
 	AssignmentController.getAssignmentById,

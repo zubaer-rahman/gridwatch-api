@@ -1,9 +1,10 @@
-import { OutageStatus } from "@prisma/client";
+import { OutageStatus, Priority, type Prisma } from "@prisma/client";
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma.js";
 import AppError from "../../utils/AppError.js";
 import type {
 	ICreateOutagePayload,
+	IOutageFilterRequest,
 	IUpdateOutagePayload,
 } from "./outage.interface.js";
 
@@ -21,9 +22,23 @@ const createOutage = async (payload: ICreateOutagePayload) => {
 	});
 };
 
-const getAllOutages = async () => {
+const getAllOutages = async (filters: IOutageFilterRequest = {}) => {
+	const whereConditions: Prisma.OutageWhereInput = { deletedAt: null };
+
+	if (filters.status) {
+		whereConditions.status = filters.status as OutageStatus;
+	}
+
+	if (filters.areaId) {
+		whereConditions.areaId = filters.areaId;
+	}
+
+	if (filters.priority) {
+		whereConditions.priority = filters.priority as Priority;
+	}
+
 	return await prisma.outage.findMany({
-		where: { deletedAt: null },
+		where: whereConditions,
 		include: {
 			area: {
 				select: {

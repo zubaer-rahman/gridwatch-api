@@ -120,6 +120,56 @@ const getAllReports = async (
 	});
 };
 
+const getMyReports = async (
+	filters: IReportFilterRequest,
+	customerId: string,
+) => {
+	const whereConditions: Prisma.OutageReportWhereInput = {
+		deletedAt: null,
+		customerId,
+	};
+
+	if (filters.areaId) {
+		whereConditions.areaId = filters.areaId;
+	}
+
+	if (filters.outageId) {
+		whereConditions.outageId = filters.outageId;
+	}
+
+	if (filters.isPriority !== undefined) {
+		whereConditions.isPriority = filters.isPriority === "true";
+	}
+
+	return await prisma.outageReport.findMany({
+		where: whereConditions,
+		include: {
+			area: {
+				select: { id: true, name: true },
+			},
+			outage: {
+				select: {
+					id: true,
+					status: true,
+					priority: true,
+					estimatedRestorationTime: true,
+					assignments: {
+						include: {
+							operator: {
+								select: { id: true, name: true, contactNumber: true },
+							},
+						},
+					},
+				},
+			},
+			payment: {
+				select: { id: true, amount: true, status: true, transactionId: true },
+			},
+		},
+		orderBy: { createdAt: "desc" },
+	});
+};
+
 const getReportById = async (id: string, user: RequestUser) => {
 	const report = await prisma.outageReport.findUnique({
 		where: { id, deletedAt: null },
@@ -213,6 +263,7 @@ const deleteReport = async (id: string) => {
 export const ReportService = {
 	createReport,
 	getAllReports,
+	getMyReports,
 	getReportById,
 	updateReport,
 	deleteReport,

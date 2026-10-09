@@ -17,6 +17,7 @@ router.post(
 router.get(
 	"/",
 	auth(Role.ADMIN, Role.OPERATOR, Role.CUSTOMER),
+	validateRequest(OutageValidation.getAllOutagesQuerySchema),
 	OutageController.getAllOutages,
 );
 router.get(

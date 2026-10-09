@@ -29,6 +29,17 @@ const getAllReports = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getMyReports = catchAsync(async (req: Request, res: Response) => {
+	const filters = req.query as IReportFilterRequest;
+	const result = await ReportService.getMyReports(filters, req.user.userId);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		message: "My reports retrieved successfully",
+		data: result,
+	});
+});
+
 const getReportById = catchAsync(async (req: Request, res: Response) => {
 	const result = await ReportService.getReportById(
 		req.params.id as string,
@@ -68,6 +79,7 @@ const deleteReport = catchAsync(async (req: Request, res: Response) => {
 export const ReportController = {
 	createReport,
 	getAllReports,
+	getMyReports,
 	getReportById,
 	updateReport,
 	deleteReport,

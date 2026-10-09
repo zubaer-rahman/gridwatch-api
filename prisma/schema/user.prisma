@@ -10,6 +10,8 @@ model User {
   isActive      Boolean           @default(true)
   zoneId        String?
   zone          DistributionZone? @relation(fields: [zoneId], references: [id])
+  areaId        String?
+  area          Area?             @relation(fields: [areaId], references: [id])
 
   reports       OutageReport[]
   assignments   Assignment[]
@@ -24,6 +26,7 @@ model User {
   @@index([role])
   @@index([email])
   @@index([zoneId])
+  @@index([areaId])
   @@map("users")
 }
 

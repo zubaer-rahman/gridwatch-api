@@ -184,6 +184,52 @@ const getAllAssignments = async (
 	});
 };
 
+const getMyAssignments = async (
+	operatorId: string,
+	filters: IAssignmentFilterRequest = {},
+) => {
+	const whereConditions: Prisma.AssignmentWhereInput = { operatorId };
+
+	if (filters.outageId) {
+		whereConditions.outageId = filters.outageId;
+	}
+
+	return await prisma.assignment.findMany({
+		where: whereConditions,
+		include: {
+			outage: {
+				select: {
+					id: true,
+					status: true,
+					priority: true,
+					estimatedRestorationTime: true,
+					description: true,
+					area: {
+						select: {
+							id: true,
+							name: true,
+							feeder: {
+								select: {
+									id: true,
+									name: true,
+									substation: {
+										select: {
+											id: true,
+											name: true,
+											zone: { select: { id: true, name: true } },
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		orderBy: { createdAt: "desc" },
+	});
+};
+
 const getAssignmentById = async (id: string) => {
 	const assignment = await prisma.assignment.findUnique({
 		where: { id },
@@ -268,6 +314,7 @@ const deleteAssignment = async (id: string, actorId: string) => {
 export const AssignmentService = {
 	createAssignment,
 	getAllAssignments,
+	getMyAssignments,
 	getAssignmentById,
 	deleteAssignment,
 };

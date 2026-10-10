@@ -59,6 +59,18 @@ const getAllOutages = async (filters: IOutageFilterRequest = {}) => {
 					},
 				},
 			},
+			assignments: {
+				include: {
+					operator: {
+						select: {
+							id: true,
+							name: true,
+							email: true,
+							contactNumber: true,
+						},
+					},
+				},
+			},
 			_count: {
 				select: { reports: true, assignments: true },
 			},
@@ -92,7 +104,18 @@ const getOutageById = async (id: string) => {
 			reports: {
 				where: { deletedAt: null },
 			},
-			assignments: true,
+			assignments: {
+				include: {
+					operator: {
+						select: {
+							id: true,
+							name: true,
+							email: true,
+							contactNumber: true,
+						},
+					},
+				},
+			},
 		},
 	});
 

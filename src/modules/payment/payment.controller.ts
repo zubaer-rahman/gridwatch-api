@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import httpStatus from "http-status";
+import config from "../../config/index.js";
 import catchAsync from "../../utils/catchAsync.js";
 import sendResponse from "../../utils/sendResponse.js";
 import { PaymentService } from "./payment.service.js";
@@ -23,7 +24,7 @@ const processCallback = catchAsync(async (req: Request, res: Response) => {
 
 	await PaymentService.processCallback(paymentID, status);
 
-	const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+	const clientUrl = config.client_url || "http://localhost:3000";
 	return res.redirect(
 		`${clientUrl}/customer/payments/callback?paymentID=${encodeURIComponent(paymentID)}&status=${encodeURIComponent(status)}`,
 	);

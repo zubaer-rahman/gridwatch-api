@@ -28,8 +28,25 @@ const limiter = rateLimit({
 	},
 });
 
-app.use(helmet());
-app.use(cors());
+app.use(
+	helmet({
+		crossOriginResourcePolicy: { policy: "cross-origin" },
+	}),
+);
+app.use(
+	cors({
+		origin: true,
+		credentials: true,
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+		allowedHeaders: [
+			"Content-Type",
+			"Authorization",
+			"X-Requested-With",
+			"Accept",
+			"Origin",
+		],
+	}),
+);
 app.use(limiter);
 
 app.get("/", (_req: Request, res: Response) => {

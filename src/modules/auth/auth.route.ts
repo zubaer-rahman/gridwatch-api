@@ -23,6 +23,21 @@ router.post(
 	AuthController.loginUser,
 );
 
+router.get("/login", (_req, res) => {
+	res.status(405).json({
+		success: false,
+		message:
+			"Method Not Allowed. Authentication requires a POST request with email and password.",
+		errors: [
+			{
+				path: "/api/v1/auth/login",
+				message:
+					"Use POST with JSON body containing email and password to authenticate",
+			},
+		],
+	});
+});
+
 router.post(
 	"/refresh-token",
 	validateRequest(AuthValidation.refreshTokenSchema),

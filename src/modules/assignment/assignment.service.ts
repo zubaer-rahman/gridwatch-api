@@ -75,13 +75,29 @@ const createAssignment = async (
 			operatorId: payload.operatorId,
 			outageId: payload.outageId,
 		},
+		include: {
+			operator: {
+				select: {
+					id: true,
+					name: true,
+					email: true,
+					contactNumber: true,
+					zone: { select: { id: true, name: true } },
+				},
+			},
+			outage: {
+				select: {
+					id: true,
+					status: true,
+					priority: true,
+					area: { select: { id: true, name: true } },
+				},
+			},
+		},
 	});
 
 	if (existingAssignment) {
-		throw new AppError(
-			httpStatus.CONFLICT,
-			"Operator is already assigned to this Outage",
-		);
+		return existingAssignment;
 	}
 
 	// 5. Atomic Transaction: Create Assignment, Advance Outage status, and log Audit

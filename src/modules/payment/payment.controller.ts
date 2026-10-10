@@ -18,37 +18,15 @@ const initiatePayment = catchAsync(async (req: Request, res: Response) => {
 });
 
 const processCallback = catchAsync(async (req: Request, res: Response) => {
-	const _result = await PaymentService.processCallback(
-		req.query.paymentID as string,
-		req.query.status as string,
+	const paymentID = (req.query.paymentID as string) || "";
+	const status = (req.query.status as string) || "";
+
+	await PaymentService.processCallback(paymentID, status);
+
+	const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+	return res.redirect(
+		`${clientUrl}/customer/payments/callback?paymentID=${encodeURIComponent(paymentID)}&status=${encodeURIComponent(status)}`,
 	);
-
-	let htmlContent = "";
-	if (req.query.status === "success") {
-		htmlContent = `
-			<html>
-				<head><title>Payment Successful</title></head>
-				<body style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-					<h1 style="color: green;">Payment Successful!</h1>
-					<p>Your transaction has been verified. Priority Outage Report enabled.</p>
-					<button onclick="window.close()" style="padding: 10px 20px; font-size: 16px;">Close Window</button>
-				</body>
-			</html>
-		`;
-	} else {
-		htmlContent = `
-			<html>
-				<head><title>Payment Failed</title></head>
-				<body style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-					<h1 style="color: red;">Payment Failed or Cancelled</h1>
-					<p>Unfortunately, your payment could not be processed.</p>
-					<button onclick="window.close()" style="padding: 10px 20px; font-size: 16px;">Close Window</button>
-				</body>
-			</html>
-		`;
-	}
-
-	res.send(htmlContent);
 });
 
 const getAllPayments = catchAsync(async (_req: Request, res: Response) => {

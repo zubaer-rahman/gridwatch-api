@@ -1,4 +1,4 @@
-import { PaymentStatus, type Prisma } from "@prisma/client";
+import { PaymentStatus, Prisma } from "@prisma/client";
 import httpStatus from "http-status";
 import config from "../../config/index.js";
 import {
@@ -22,6 +22,7 @@ const initiatePayment = async (
 		throw new AppError(httpStatus.NOT_FOUND, "Customer not found");
 	}
 
+	let existingPayment = null;
 	if (payload.outageReportId) {
 		const report = await prisma.outageReport.findUnique({
 			where: { id: payload.outageReportId, deletedAt: null },
@@ -30,6 +31,17 @@ const initiatePayment = async (
 			throw new AppError(
 				httpStatus.NOT_FOUND,
 				"Associated Outage Report not found",
+			);
+		}
+
+		existingPayment = await prisma.payment.findUnique({
+			where: { outageReportId: payload.outageReportId },
+		});
+
+		if (existingPayment && existingPayment.status === PaymentStatus.SUCCESS) {
+			throw new AppError(
+				httpStatus.CONFLICT,
+				"Payment for this outage report has already been completed",
 			);
 		}
 	}
@@ -55,16 +67,31 @@ const initiatePayment = async (
 		);
 	}
 
-	const payment = await prisma.payment.create({
-		data: {
-			customerId,
-			amount: payload.amount,
-			reason: payload.reason,
-			outageReportId: payload.outageReportId,
-			transactionId: data.paymentID,
-			status: PaymentStatus.PENDING,
-		},
-	});
+	let payment;
+	if (existingPayment) {
+		payment = await prisma.payment.update({
+			where: { id: existingPayment.id },
+			data: {
+				customerId,
+				amount: payload.amount,
+				reason: payload.reason,
+				transactionId: data.paymentID,
+				status: PaymentStatus.PENDING,
+				gatewayData: Prisma.DbNull,
+			},
+		});
+	} else {
+		payment = await prisma.payment.create({
+			data: {
+				customerId,
+				amount: payload.amount,
+				reason: payload.reason,
+				outageReportId: payload.outageReportId,
+				transactionId: data.paymentID,
+				status: PaymentStatus.PENDING,
+			},
+		});
+	}
 
 	return {
 		paymentId: payment.id,

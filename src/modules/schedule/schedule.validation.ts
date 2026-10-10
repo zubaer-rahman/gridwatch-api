@@ -1,6 +1,12 @@
 import { ScheduleStatus } from "@prisma/client";
 import { z } from "zod";
 
+const scheduleStatusSchema = z
+	.enum(["UPCOMING", "ONGOING", "ACTIVE", "COMPLETED", "CANCELLED"])
+	.transform((val) =>
+		val === "ACTIVE" ? ScheduleStatus.ONGOING : (val as ScheduleStatus),
+	);
+
 const createScheduleSchema = z.object({
 	body: z
 		.object({
@@ -20,7 +26,7 @@ const updateScheduleSchema = z.object({
 		.object({
 			startsAt: z.string().datetime().optional(),
 			endsAt: z.string().datetime().optional(),
-			status: z.nativeEnum(ScheduleStatus).optional(),
+			status: scheduleStatusSchema.optional(),
 			reason: z.string().optional(),
 		})
 		.refine(
@@ -40,7 +46,7 @@ const updateScheduleSchema = z.object({
 const getAllSchedulesQuerySchema = z.object({
 	query: z.object({
 		areaId: z.string().optional(),
-		status: z.nativeEnum(ScheduleStatus).optional(),
+		status: scheduleStatusSchema.optional(),
 		startDate: z.string().datetime().optional(),
 		endDate: z.string().datetime().optional(),
 		sortBy: z.enum(["startsAt", "createdAt"]).optional(),

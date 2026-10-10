@@ -189,6 +189,41 @@ const updateSchedule = async (id: string, payload: IUpdateSchedulePayload) => {
 		throw new AppError(httpStatus.NOT_FOUND, "Schedule not found");
 	}
 
+	if (payload.status && payload.status !== schedule.status) {
+		if (schedule.status === ScheduleStatus.COMPLETED) {
+			throw new AppError(
+				httpStatus.BAD_REQUEST,
+				"Cannot modify a completed schedule",
+			);
+		}
+		if (schedule.status === ScheduleStatus.CANCELLED) {
+			throw new AppError(
+				httpStatus.BAD_REQUEST,
+				"Cannot modify a cancelled schedule",
+			);
+		}
+		if (
+			schedule.status === ScheduleStatus.UPCOMING &&
+			payload.status !== ScheduleStatus.ONGOING &&
+			payload.status !== ScheduleStatus.CANCELLED
+		) {
+			throw new AppError(
+				httpStatus.BAD_REQUEST,
+				"Upcoming schedule can only be started (ONGOING) or cancelled",
+			);
+		}
+		if (
+			schedule.status === ScheduleStatus.ONGOING &&
+			payload.status !== ScheduleStatus.COMPLETED &&
+			payload.status !== ScheduleStatus.CANCELLED
+		) {
+			throw new AppError(
+				httpStatus.BAD_REQUEST,
+				"Ongoing schedule can only be completed or cancelled",
+			);
+		}
+	}
+
 	const newStartsAt = payload.startsAt
 		? new Date(payload.startsAt)
 		: schedule.startsAt;

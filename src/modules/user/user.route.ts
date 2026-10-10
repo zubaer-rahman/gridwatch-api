@@ -14,7 +14,11 @@ router.post(
 	UserController.createUser,
 );
 
-router.get("/", auth(Role.ADMIN), UserController.getAllUsers);
+router.get(
+	"/",
+	auth(Role.ADMIN, Role.OPERATOR),
+	UserController.getAllUsers,
+);
 
 router.patch(
 	"/:id",

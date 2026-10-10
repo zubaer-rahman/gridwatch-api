@@ -8,6 +8,8 @@ const router = express.Router();
 
 router.get("/", auth(), NotificationController.getMyNotifications);
 
+router.patch("/read-all", auth(), NotificationController.markAllAsRead);
+
 router.patch(
 	"/:id/read",
 	auth(),

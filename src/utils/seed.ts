@@ -48,3 +48,104 @@ export const seedSuperAdmin = async () => {
 		console.error("❌ Failed to seed Super Admin:", error);
 	}
 };
+
+export const seedNotifications = async () => {
+	try {
+		const users = await prisma.user.findMany({
+			where: { deletedAt: null },
+			select: { id: true, role: true, name: true },
+		});
+
+		for (const user of users) {
+			const existingCount = await prisma.notification.count({
+				where: { userId: user.id },
+			});
+			if (existingCount > 0) continue;
+
+			if (user.role === Role.ADMIN) {
+				await prisma.notification.createMany({
+					data: [
+						{
+							userId: user.id,
+							title: "System Telemetry Online",
+							message:
+								"All 12 substations and transmission lines are broadcasting nominal metrics.",
+							isRead: false,
+						},
+						{
+							userId: user.id,
+							title: "Peak Load Advisory",
+							message:
+								"Dhaka Central sector reached 82% feeder capacity during afternoon hours.",
+							isRead: false,
+						},
+						{
+							userId: user.id,
+							title: "System Audit Logged",
+							message:
+								"Automatic daily security check and role sync verified successfully.",
+							isRead: true,
+						},
+					],
+				});
+			} else if (user.role === Role.OPERATOR) {
+				await prisma.notification.createMany({
+					data: [
+						{
+							userId: user.id,
+							title: "Shift Telemetry Ready",
+							message:
+								"Scheduled feeder inspection assigned for Mirpur Substation.",
+							isRead: false,
+						},
+						{
+							userId: user.id,
+							title: "Grid Alert Acknowledged",
+							message:
+								"Gulshan-2 feeder maintenance window confirmed by SCADA team.",
+							isRead: false,
+						},
+						{
+							userId: user.id,
+							title: "Work Order Completed",
+							message:
+								"Work order #ORD-4029 marked resolved and safety verified.",
+							isRead: true,
+						},
+					],
+				});
+			} else {
+				// CUSTOMER
+				await prisma.notification.createMany({
+					data: [
+						{
+							userId: user.id,
+							title: "Welcome to GridWatch",
+							message:
+								"Your residential consumer account is verified and ready for real-time alerts.",
+							isRead: false,
+						},
+						{
+							userId: user.id,
+							title: "Scheduled Maintenance Advisory",
+							message:
+								"Preventive grid maintenance scheduled in your zone on Sunday 02:00 - 04:00 AM.",
+							isRead: false,
+						},
+						{
+							userId: user.id,
+							title: "Power Restored",
+							message:
+								"Grid normalisation confirmed for recent feeder outage in your area.",
+							isRead: true,
+						},
+					],
+				});
+			}
+		}
+		console.log("🔔 Seeded demo notifications for users.");
+	} catch (error) {
+		console.error("❌ Failed to seed notifications:", error);
+	}
+};
+

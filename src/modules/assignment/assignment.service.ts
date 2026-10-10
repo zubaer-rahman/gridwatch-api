@@ -152,6 +152,14 @@ const createAssignment = async (
 			},
 		});
 
+		await tx.notification.create({
+			data: {
+				userId: operator.id,
+				title: "New Outage Assignment",
+				message: `You have been assigned to outage incident in ${outage.area.name}. Priority: ${outage.priority}.`,
+			},
+		});
+
 		// Reflect the new status in the returned payload
 		assignment.outage.status = newStatus;
 

@@ -195,6 +195,20 @@ const updateOutage = async (
 					newData: { status: payload.status },
 				},
 			});
+
+			const reports = await tx.outageReport.findMany({
+				where: { outageId: id, deletedAt: null },
+				select: { customerId: true },
+			});
+			for (const r of reports) {
+				await tx.notification.create({
+					data: {
+						userId: r.customerId,
+						title: `Outage Status Update: ${payload.status}`,
+						message: `Outage status has been updated to ${payload.status}.`,
+					},
+				});
+			}
 		}
 
 		return updatedOutage;

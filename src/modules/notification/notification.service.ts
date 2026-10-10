@@ -68,7 +68,37 @@ const markAsRead = async (id: string, userId: string) => {
 	return result;
 };
 
+const markAllAsRead = async (userId: string) => {
+	const result = await prisma.notification.updateMany({
+		where: { userId, isRead: false },
+		data: { isRead: true },
+	});
+
+	return result;
+};
+
+const createNotification = async (
+	userId: string,
+	title: string,
+	message: string,
+) => {
+	try {
+		return await prisma.notification.create({
+			data: {
+				userId,
+				title,
+				message,
+			},
+		});
+	} catch (error) {
+		console.error("Failed to create notification:", error);
+		return null;
+	}
+};
+
 export const NotificationService = {
 	getMyNotifications,
 	markAsRead,
+	markAllAsRead,
+	createNotification,
 };

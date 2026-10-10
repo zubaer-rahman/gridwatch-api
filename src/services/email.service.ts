@@ -28,6 +28,12 @@ const sendBrevoEmail = async (to: string, name: string, subject: string, htmlCon
 	if (!response.ok) {
 		const errorData = await response.text();
 		console.error("Brevo API error:", errorData);
+		if (config.env === "development") {
+			console.warn(
+				"⚠️ [DEV MODE] Brevo email delivery failed. If using IP whitelist, authorize your IP at: https://app.brevo.com/security/authorised_ips. Continuing with local console notifications.",
+			);
+			return;
+		}
 		throw new Error("Failed to send email via Brevo");
 	}
 };
@@ -38,6 +44,13 @@ const sendRegistrationOTP = async (
 	otp: string,
 	expirationMinutes: number,
 ) => {
+	console.log(
+		`\n📬 [EMAIL NOTIFICATION] To: ${to} (${name}) | Subject: GridWatch: Verify Your Email`,
+	);
+	console.log(
+		`🔑 [OTP CODE]: ${otp} (Valid for ${expirationMinutes} minutes)\n`,
+	);
+
 	const templatePath = path.join(
 		process.cwd(),
 		"src/templates/registration-otp.ejs",
@@ -53,11 +66,17 @@ const sendRegistrationOTP = async (
 		await sendBrevoEmail(to, name, "GridWatch: Verify Your Email", html);
 	} catch (error: any) {
 		console.error("Email service error:", error);
-		throw new Error("Failed to send OTP email: " + error.message);
+		if (config.env !== "development") {
+			throw new Error(`Failed to send OTP email: ${error.message}`);
+		}
 	}
 };
 
 const sendWelcomeEmail = async (to: string, name: string) => {
+	console.log(
+		`\n📬 [EMAIL NOTIFICATION] To: ${to} (${name}) | Subject: Welcome to GridWatch!\n`,
+	);
+
 	const templatePath = path.join(
 		process.cwd(),
 		"src/templates/welcome-email.ejs",
@@ -69,7 +88,9 @@ const sendWelcomeEmail = async (to: string, name: string) => {
 		await sendBrevoEmail(to, name, "Welcome to GridWatch!", html);
 	} catch (error: any) {
 		console.error("Email service error:", error);
-		throw new Error("Failed to send welcome email: " + error.message);
+		if (config.env !== "development") {
+			throw new Error(`Failed to send welcome email: ${error.message}`);
+		}
 	}
 };
 

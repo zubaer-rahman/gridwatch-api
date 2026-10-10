@@ -171,6 +171,14 @@ const processCallback = async (paymentID: string, status: string) => {
 			},
 		});
 
+		await tx.notification.create({
+			data: {
+				userId: payment.customerId,
+				title: "Payment Confirmed",
+				message: `Your payment of BDT ${payment.amount} (TrxID: ${payment.transactionId}) has been verified successfully. Priority response enabled.`,
+			},
+		});
+
 		return {
 			message: "Payment processed successfully",
 			payment: updatedPayment,

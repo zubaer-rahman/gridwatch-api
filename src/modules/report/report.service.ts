@@ -50,7 +50,7 @@ const createReport = async (payload: ICreateReportPayload) => {
 			outageId = newOutage.id;
 		}
 
-		return await tx.outageReport.create({
+		const report = await tx.outageReport.create({
 			data: {
 				customerId: payload.customerId,
 				areaId: payload.areaId,
@@ -70,6 +70,16 @@ const createReport = async (payload: ICreateReportPayload) => {
 				},
 			},
 		});
+
+		await tx.notification.create({
+			data: {
+				userId: payload.customerId,
+				title: "Outage Report Received",
+				message: `Your outage report for ${isAreaExists.name} has been received and logged into our telemetry monitoring system.`,
+			},
+		});
+
+		return report;
 	});
 };
 

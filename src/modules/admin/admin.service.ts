@@ -1,4 +1,4 @@
-import { PaymentStatus, type Prisma } from "@prisma/client";
+import { PaymentStatus, type Prisma, Role } from "@prisma/client";
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma.js";
 import AppError from "../../utils/AppError.js";
@@ -9,13 +9,14 @@ const getAllUsers = async (query: IAdminUserQuery) => {
 	const page = query.page ? Number(query.page) : 1;
 	const skip = (page - 1) * limit;
 
-	const andConditions: Prisma.UserWhereInput[] = [];
+	const andConditions: Prisma.UserWhereInput[] = [{ deletedAt: null }];
 
 	if (query.search) {
 		andConditions.push({
 			OR: [
 				{ name: { contains: query.search, mode: "insensitive" } },
 				{ email: { contains: query.search, mode: "insensitive" } },
+				{ contactNumber: { contains: query.search, mode: "insensitive" } },
 			],
 		});
 	}
@@ -24,8 +25,11 @@ const getAllUsers = async (query: IAdminUserQuery) => {
 		andConditions.push({ isActive: query.status === "ACTIVE" });
 	}
 
-	if (query.role) {
-		andConditions.push({ role: query.role });
+	if (query.role && (query.role as string).toUpperCase() !== "ALL") {
+		const normalizedRole = (query.role as string).toUpperCase().trim() as Role;
+		if (Object.values(Role).includes(normalizedRole)) {
+			andConditions.push({ role: normalizedRole });
+		}
 	}
 
 	const whereConditions: Prisma.UserWhereInput =
@@ -41,6 +45,14 @@ const getAllUsers = async (query: IAdminUserQuery) => {
 			name: true,
 			email: true,
 			role: true,
+			contactNumber: true,
+			zoneId: true,
+			zone: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
 			isActive: true,
 			createdAt: true,
 		},

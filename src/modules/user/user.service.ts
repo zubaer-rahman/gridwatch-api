@@ -47,6 +47,7 @@ const createUser = async (payload: ICreateUserPayload) => {
 			password: hashedPassword,
 			contactNumber: payload.contactNumber,
 			zoneId: payload.zoneId,
+			role: payload.role,
 			isActive: true,
 		},
 		select: {

@@ -165,6 +165,7 @@ const loginUser = async (payload: ILoginUserPayload) => {
 		userId: user.id,
 		email: user.email,
 		role: user.role,
+		avatar: user.avatar,
 	};
 
 	const accessToken = jwtUtils.createToken(
@@ -223,6 +224,7 @@ const refreshToken = async (token: string) => {
 		userId: user.id,
 		email: user.email,
 		role: user.role,
+		avatar: user.avatar,
 	};
 
 	const accessToken = jwtUtils.createToken(
@@ -296,6 +298,7 @@ const googleLogin = async (payload: { idToken: string }) => {
 		userId: user.id,
 		email: user.email,
 		role: user.role,
+		avatar: user.avatar,
 	};
 
 	const accessToken = jwtUtils.createToken(

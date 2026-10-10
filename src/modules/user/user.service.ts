@@ -217,9 +217,35 @@ const uploadAvatar = async (id: string, file: Express.Multer.File) => {
 	});
 };
 
+const getMe = async (id: string) => {
+	const user = await prisma.user.findUnique({
+		where: { id, deletedAt: null },
+		select: {
+			id: true,
+			name: true,
+			email: true,
+			role: true,
+			avatar: true,
+			contactNumber: true,
+			isActive: true,
+			zoneId: true,
+			areaId: true,
+			createdAt: true,
+			updatedAt: true,
+		},
+	});
+
+	if (!user) {
+		throw new AppError(httpStatus.NOT_FOUND, "User not found");
+	}
+
+	return user;
+};
+
 export const UserService = {
 	createUser,
 	updateUser,
 	getAllUsers,
 	uploadAvatar,
+	getMe,
 };

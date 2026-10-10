@@ -53,9 +53,20 @@ const uploadAvatar = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getMe = catchAsync(async (req: Request, res: Response) => {
+	const result = await UserService.getMe(req.user.userId);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		message: "Current user profile retrieved successfully",
+		data: result,
+	});
+});
+
 export const UserController = {
 	createUser,
 	updateUser,
 	getAllUsers,
 	uploadAvatar,
+	getMe,
 };

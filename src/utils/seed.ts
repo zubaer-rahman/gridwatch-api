@@ -149,3 +149,50 @@ export const seedNotifications = async () => {
 	}
 };
 
+export const seedSchedules = async () => {
+	try {
+		const existingCount = await prisma.schedule.count({
+			where: { deletedAt: null },
+		});
+		if (existingCount > 0) return;
+
+		const area = await prisma.area.findFirst({
+			where: { deletedAt: null },
+		});
+		if (!area) return;
+
+		const now = Date.now();
+		await prisma.schedule.createMany({
+			data: [
+				{
+					areaId: area.id,
+					startsAt: new Date(now + 2 * 60 * 60 * 1000),
+					endsAt: new Date(now + 4 * 60 * 60 * 1000),
+					status: "UPCOMING",
+					reason:
+						"Substation Transformer Overhaul & Busbar Tightening",
+				},
+				{
+					areaId: area.id,
+					startsAt: new Date(now + 24 * 60 * 60 * 1000),
+					endsAt: new Date(now + 27 * 60 * 60 * 1000),
+					status: "UPCOMING",
+					reason:
+						"Feeder Line Load Balancing & Preventive Tree Trimming",
+				},
+				{
+					areaId: area.id,
+					startsAt: new Date(now - 4 * 60 * 60 * 1000),
+					endsAt: new Date(now - 1 * 60 * 60 * 1000),
+					status: "COMPLETED",
+					reason: "Capacitor Bank Calibration & Surge Arrestor Test",
+				},
+			],
+		});
+		console.log("📅 Seeded demo load shedding & maintenance schedules.");
+	} catch (error) {
+		console.error("❌ Failed to seed schedules:", error);
+	}
+};
+
+

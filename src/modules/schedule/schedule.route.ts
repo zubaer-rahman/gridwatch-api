@@ -9,7 +9,7 @@ const router = Router();
 
 router.post(
 	"/",
-	auth(Role.ADMIN),
+	auth(Role.ADMIN, Role.OPERATOR),
 	validateRequest(ScheduleValidation.createScheduleSchema),
 	ScheduleController.createSchedule,
 );

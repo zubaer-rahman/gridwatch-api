@@ -51,7 +51,7 @@ const createSchedule = async (payload: ICreateSchedulePayload) => {
 
 	await checkConflict(payload.areaId, payload.startsAt, payload.endsAt);
 
-	return await prisma.schedule.create({
+	const newSchedule = await prisma.schedule.create({
 		data: {
 			areaId: payload.areaId,
 			startsAt: new Date(payload.startsAt),
@@ -59,7 +59,48 @@ const createSchedule = async (payload: ICreateSchedulePayload) => {
 			reason: payload.reason,
 			status: ScheduleStatus.UPCOMING,
 		},
+		include: {
+			area: {
+				select: {
+					id: true,
+					name: true,
+					feeder: {
+						select: {
+							id: true,
+							name: true,
+							substation: {
+								select: {
+									id: true,
+									name: true,
+									zone: { select: { id: true, name: true } },
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	});
+
+	try {
+		const affectedUsers = await prisma.user.findMany({
+			where: { areaId: payload.areaId, deletedAt: null },
+			select: { id: true },
+		});
+		for (const u of affectedUsers) {
+			await prisma.notification.create({
+				data: {
+					userId: u.id,
+					title: "Maintenance Scheduled",
+					message: `Scheduled maintenance planned for your area (${isAreaExists.name}) from ${new Date(payload.startsAt).toLocaleTimeString()} to ${new Date(payload.endsAt).toLocaleTimeString()}. Reason: ${payload.reason || "General grid maintenance"}.`,
+				},
+			});
+		}
+	} catch (err) {
+		console.error("Failed to notify users about schedule:", err);
+	}
+
+	return newSchedule;
 };
 
 const getAllSchedules = async (query: IGetAllSchedulesQuery) => {
@@ -84,7 +125,23 @@ const getAllSchedules = async (query: IGetAllSchedulesQuery) => {
 		orderBy,
 		include: {
 			area: {
-				select: { id: true, name: true },
+				select: {
+					id: true,
+					name: true,
+					feeder: {
+						select: {
+							id: true,
+							name: true,
+							substation: {
+								select: {
+									id: true,
+									name: true,
+									zone: { select: { id: true, name: true } },
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	});
@@ -95,7 +152,23 @@ const getScheduleById = async (id: string) => {
 		where: { id, deletedAt: null },
 		include: {
 			area: {
-				select: { id: true, name: true },
+				select: {
+					id: true,
+					name: true,
+					feeder: {
+						select: {
+							id: true,
+							name: true,
+							substation: {
+								select: {
+									id: true,
+									name: true,
+									zone: { select: { id: true, name: true } },
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	});
@@ -143,6 +216,27 @@ const updateSchedule = async (id: string, payload: IUpdateSchedulePayload) => {
 			...payload,
 			startsAt: payload.startsAt ? new Date(payload.startsAt) : undefined,
 			endsAt: payload.endsAt ? new Date(payload.endsAt) : undefined,
+		},
+		include: {
+			area: {
+				select: {
+					id: true,
+					name: true,
+					feeder: {
+						select: {
+							id: true,
+							name: true,
+							substation: {
+								select: {
+									id: true,
+									name: true,
+									zone: { select: { id: true, name: true } },
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	});
 };

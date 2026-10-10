@@ -1,9 +1,14 @@
-import { seedNotifications, seedSuperAdmin } from "../src/utils/seed.js";
+import {
+	seedNotifications,
+	seedSchedules,
+	seedSuperAdmin,
+} from "../src/utils/seed.js";
 import { prisma } from "../src/lib/prisma.js";
 
 async function main() {
 	await seedSuperAdmin();
 	await seedNotifications();
+	await seedSchedules();
 }
 
 main()
